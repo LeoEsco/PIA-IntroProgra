@@ -1,0 +1,166 @@
+from datetime import datetime #importamos datime para hacer uso de este mismo
+
+#Creamos una lista de oficios y un diccionario de grados academicos
+OFICIOS = ['Enfermeria','Medico','Terapeuta','Fisicoterapeuta','Cuidador de personas mayores','Bar tender','Cleaner','Removal','Repartidor','Constructor']
+GRADOS_ACADEMICOS = {'P': 'Posgrado','U': 'Titulo Universitario','T': 'Tecnico','N': 'Ninguno'}
+
+#Declaramos variables que sin valor que evitaran errores en el futuro del codigo.
+fecha_actual = datetime.today().date()
+fecnacM = None 
+fecnacB1 = None
+fecnacB2 = None 
+cantidad_hijos = None
+puntos_B1=0
+puntos_B2=0
+puntos_M=0
+puntos_oficioM=0
+puntos_gradoM=0
+puntos_oficioB1=0
+puntos_oficioB2=0
+puntos_gradoB1=0
+puntos_gradoB2=0
+edad_B2=0
+
+#Hacemos una funcion que pregunte los datos que ocupamos saber del progenitor. 
+def datos_progenitor():
+    sexo = input('Indique el sexo del progenitor/a (F) Femenino, (M) Masculino o (N) No binario: ').upper()
+    fecnac = input('Indique la fecha de nacimiento del progenitor/a (YYYY/MM/DD): ')
+    fecnac = datetime.strptime(fecnac, '%Y/%m/%d')
+    grado = input('Ingrese el grado de estudios del progenitor/a (P) Posgrado, (U) Titulo Universitario, (T) Tecnico, (N) Ninguno: ')
+    while grado not in GRADOS_ACADEMICOS: #Validacion para los grados academicos
+        print('Error. Grado invalido. Intente de nuevo.')
+        grado = input('Ingrese el grado de estudios del progenitor/a (P) Posgrado, (U) Titulo Universitario, (T) Tecnico, (N) Ninguno: ')
+    oficios = input(f'¿Ejerce alguno de estos oficios? {OFICIOS}' + '(S/N): ')
+    return sexo, fecnac, GRADOS_ACADEMICOS[grado], oficios
+
+#Preguntamos el tipo de familia y dependiendo de la respuesta asignamos diferentes variables para los progenitores donde se hara uso de la funcion.
+tipo_familia = input('Ingrese el tipo de familia (M) Monoparental o (B) Biparental: ').upper()#Usamos .upper como validacion
+if tipo_familia=='M': 
+    print('Ingrese los datos del progenitor ')
+    sexoM, fecnacM, gradoM, oficioM = datos_progenitor() #Variables en caso de que la familia sea monoparental
+elif tipo_familia=='B':
+    print('Ingrese los datos del primer progenitor/a')
+    sexoB1, fecnacB1, gradoB1, oficioB1 = datos_progenitor() #Variables para el 1er progenitor en caso de que la familia sea biparental.
+    print('Ingrese los datos del segundo progenitor/a')
+    sexoB2, fecnacB2, gradoB2, oficioB2 = datos_progenitor() #Variables para el 2do progenitor en caso de que la familia sea biparental.
+
+#Hacemos una funcion para los datos de los hijos
+def datos_hijos():
+    sexo = input('Indique el sexo del hijo/a (F) Femenino, (M) Masculino o (N) No binario: ')
+    fecnac = input('Indique la fecha de nacimiento (YYYY/MM/DD): ')
+    return sexo, fecnac
+
+#Preguntamos la cantidad de hijos y usamos un ciclo for con el proposito de hacer la cantidad de preguntas dependiendo de la cantidad de hijos que ingrese el usuario.
+cantidad_hijos = int(input('¿Cuantos hijos hay en la familia?: '))
+cantidad_hijos_lista = [] #Aqui guardamos los datos obtenidos de la funcion
+for _ in range(cantidad_hijos): #Aqui usamos _ como una convención para indicar que una variable no se utilizará en un bucle.
+    print('Favor de ingresar los datos')
+    sexoH, fecnacH = datos_hijos()
+    cantidad_hijos_lista.append((sexoH, fecnacH)) #Aqui añadimos a la lista los datos obtenidos. 
+
+#Hacemos una funcion para calcular la edad de una persona a partir de su fecha de nacimiento
+def calcular_edad(fecha_nacimiento):
+    fecha_actual = datetime.now()
+    #Aqui hacemos la operacion de la edad tambien incluyendo los dias en que cumple año para no cometer el error de sumarle un año mas en caso de que cumpliera en diciembre 
+    edad = fecha_actual.year - fecha_nacimiento.year - ((fecha_actual.month, fecha_actual.day) < (fecha_nacimiento.month, fecha_nacimiento.day)) 
+    return edad
+
+#Hacemos una funcion para calcular la edad del unico progenitor en el caso de monoparental
+def calcular_edad_M(fecnacM):
+    edad_M = calcular_edad(fecnacM)#Aqui hacemos uso de la funcion de calcular edad. 
+    return edad_M
+
+#Hacemos una funcion para calcular la edad de los dos progenitos en base a la fecha de nacimiento. 
+def calcular_edad_B(fecnacB1, fecnacB2):
+    edad_B1 = calcular_edad(fecnacB1)#Aqui llamamos dos veces a la funcion de calcular edad, una para cada progenitor
+    edad_B2 = calcular_edad(fecnacB2)
+    return edad_B1, edad_B2
+
+#Aqui verificamos que se ingreso la opcion del tipo de familia monoparental ya que la fecha de nacimiento debe ser llenada, estariamos confirmando que se ingreso la 'M'
+if fecnacM is not None: 
+    if sexoM=='F': #Aqui comprobamos que el sexo es femenino 
+        edad_M = calcular_edad_M(fecnacM) #Aqui sacamos la edad de la progenitora 
+        if 20<= edad_M <=35: #En caso de que este entre la edad fertil hacemos las debidas operaciones. 
+            edadM_puntos = edad_M-20
+            puntos_M = 15 - edadM_puntos #Al final los puntos quedan guardados dentro de esta variable 
+#Hacemos el mismo procedimiento aqui. comprobamos que se ingreso en la opcion biparental.
+if fecnacB1 is not None and fecnacB2 is not None: 
+    if sexoB1=='F': #Comprobamos que sea F
+        edad_B1, edad_B2 = calcular_edad_B(fecnacB1,fecnacB2) #Sacamos la edad de ambos 
+        if 20<= edad_B1 <=35: 
+            edadB1_puntos = edad_B1-20
+            puntos_B1 = 15 - edadB1_puntos #Los puntos se guardan en esta variable 
+    if sexoB2=='F': #Comprobamos que sea F ya que pueden ser dos madres y se tendria que contabilizar ambas progenitras
+        if 20<= edad_B2 <=35:
+            edadB2_puntos = edad_B2-20
+            puntos_B2 = 15 - edadB1_puntos #Los puntos se guardan en esta variable 
+        
+#Declaramos dos listas que utilizaremos mas adelante. 
+valores_modificados=[] 
+valores_no_modificados=[]
+
+#Aqui comprobamos que se han ingresado mas o igual de un hijo ya que tambien se puede ingresar 0 hijos
+if cantidad_hijos > 0: 
+    cantidad_hijos_tupla = tuple(cantidad_hijos_lista) #Convertimos la lista en tupla ya que los elementos no se modificaran y necesitamos la certeza de los elementos que estamos manejando.
+    #Aqui hacemos una lista donde hijos_femeninos solo agarrara a los hijos con el sexo 'F' y omita los hijos con sexo 'M'
+    hijos_femeninos = [par for par in cantidad_hijos_tupla if par[0] == 'F'and len(par) == 2]
+    if hijos_femeninos:
+        fecha_nac_hijos = [fecha_nac for _, fecha_nac in hijos_femeninos] #Hacemos una lista donde solo agarro el segundo elemnto de cada par o sea la fecha de cada hija.
+        fecha_hijos_dt = [datetime.strptime(fecha, '%Y/%m/%d') for fecha in fecha_nac_hijos] #Hacemos una lista donde agarra las fechas ingresadas de las hijas y las hara datetime.datetime
+        #Creamos una lista donde se guardan las edades en formato int utilizando la misma formula que usamos mas arriba
+        edades = [fecha_actual.year - fecha.year - ((fecha_actual.month, fecha_actual.day)<(fecha.month,fecha.day))for fecha in fecha_hijos_dt]
+        for i in range(len(edades)): #Utilizamos un ciclo for donde le pedimos que lea todas las edades dentro de la lista 
+            if edades[i] > 20: #Este if indica que las edades superiores a 20 se le resten 20 y luego 15 (Con el proposito de sacar el tiempo fertil) y se agreguen a la lista de valores_modificados
+                valores_modificados.append(15-(edades[i] - 20))
+            else: #En caso de que no sean mayores a 20 indicaria que aun le quedan los 15 años fertiles 
+                valores_no_modificados.append(edades[i]) #Aqui los añademos a la lista 
+        valores_no_modificados=[15] * len(valores_no_modificados)#Aqui leemos todos los valores no modificados y ponemos el valor directamente como 15, haciendo referencia a los años fertiles que quedan. 
+        puntos_hijos = sum(valores_modificados) + sum(valores_no_modificados) #Sumamos las dos listas para sacar el valor total de los puntos de las hijas
+
+#Aqui emepezamos a hacer las sumatorias de los puntos. 
+if tipo_familia=='M':
+    if oficioM=='S':#En caso de que el progenitor posea algunos de los oficios se sumaran 8 puntos 
+        puntos_oficioM=8
+    if gradoM=='P':#En caso de que el progenitor tenga un grado de posgrado se sumaran 5 puntos 
+        puntos_gradoM=5
+    elif gradoM=='U':#En caso de que tenga Titulo universitario se sumaran 3 puntos
+        puntos_gradoM=3
+    cantidad_hijos = cantidad_hijos * 8 #Aqui multiplicamos la cantidad de hijos ingresada por 8 ya que cada hijo suma 8 puntos 
+    total_puntos = puntos_hijos + puntos_M + puntos_oficioM + puntos_gradoM + 6 + cantidad_hijos #Aqui sumamos todo
+    print('Su total de puntos es de: ', total_puntos) #En caso de no contar con algun valor ya sea por un progenitor sea Masculino o un hjo
+    # masculino no nos arroja un error ya que declaramos las variables al principio con un valor de 0 
+
+#En este bloque de cogio hacemos lo mismo que arriba, solo cambia el caso de que el tipo de familia sea biparental. 
+if tipo_familia=='B':
+    if oficioB1=='S':
+        puntos_oficioB1=8
+    if gradoB1=='P':
+        puntos_gradoB1=5
+    elif gradoB1=='U':
+        puntos_gradoB1=3
+    if oficioB2=='S':
+        puntos_oficioB2=8
+    if gradoB2=='P':
+        puntos_gradoB2=5
+    elif gradoB2=='U':
+        puntos_gradoB2=3
+    cantidad_hijos = cantidad_hijos * 8
+    total_puntos = puntos_hijos + puntos_B1 + puntos_B2 + puntos_oficioB1 + puntos_oficioB2 + puntos_gradoB1 + puntos_gradoB2 + 12 + cantidad_hijos
+    print('Su total de puntos es de: ',total_puntos)
+    #Al final imprimira los puntos totales, dando fin al programa. 
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+        
